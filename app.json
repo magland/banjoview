@@ -1,0 +1,8 @@
+{
+  "name": "banjoview",
+  "description": "Visualization of spike sorting datasets and results",
+  "repository": "https://github.com/magland/banjoview",
+  "logo": "",
+  "keywords": ["spike sorting", "mountainlab", "mountainsort", "mountainview", "spikeview"],
+  "image": "heroku/nodejs"
+}

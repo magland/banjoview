@@ -1,0 +1,24 @@
+{
+  "name": "banjoview",
+  "version": "0.0.1",
+  "description": "Visualize spike sorting datasets and results",
+  "engines": {
+    "node": "6.11.1"
+  },
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "node test.js"
+  },
+  "dependencies": {
+    "express": "4.15.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/magland/banjoview"
+  },
+  "keywords": [
+    "spike sorting","mountainlab","mountainsort","mountainview","spikeview"
+  ],
+  "license": "MIT"
+}
