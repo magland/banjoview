@@ -5,7 +5,7 @@ var opts={PROJECTPATH:__dirname, SOURCEPATH:['.'], SCRIPTS:[], STYLESHEETS:[]};
 
 //////////////////////////////////////////////////////////////////////
 //require('../../jsqcore/jsqcore.pri').load(opts);
-opts.SOURCEPATH.push('jsq/src/jsqcore')
+opts.SOURCEPATH.push('jsq/src/jsqcore');
 opts.SCRIPTS.push(
 	'jquery.min.js','jsq.js','jsqobject.js','jsqwidget.js','jsqcanvaswidget.js'
 );
@@ -43,7 +43,7 @@ opts.SCRIPTS.push(
 
 opts.SOURCEPATH.push('views')
 opts.SCRIPTS.push(
-	'mvtemplatesview.js','histogramview.js','mvhistogramgrid.js','mvamphistview.js','mvcrosscorrelogramsview.js'
+	'mvtemplatesview.js','histogramview.js','mvhistogramgrid.js','mvamphistview.js','mvcrosscorrelogramsview.js','firingeventsview.js'
 );
 
 opts.SOURCEPATH.push('controlwidgets')

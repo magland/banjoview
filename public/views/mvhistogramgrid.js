@@ -8,14 +8,14 @@ function MVHistogramGrid(O,mvcontext,pair_mode) {
 
 	JSQ.connect(O,'sizeChanged',O,update_layout);
 	JSQ.connect(mvcontext,'optionsChanged',O,O.recalculate);
-	if (pair_mode) {
-		JSQ.connect(mvcontext,'currentClusterPairChanged',O,do_highlighting_and_captions);
-		JSQ.connect(mvcontext,'selectedClusterPairsChanged',O,do_highlighting_and_captions);
-	}
-	else {
+	//if (pair_mode) {
+	//	JSQ.connect(mvcontext,'currentClusterPairChanged',O,do_highlighting_and_captions);
+	//	JSQ.connect(mvcontext,'selectedClusterPairsChanged',O,do_highlighting_and_captions);
+	//}
+	//else {
 		JSQ.connect(mvcontext,'currentClusterChanged',O,do_highlighting_and_captions);
 		JSQ.connect(mvcontext,'selectedClustersChanged',O,do_highlighting_and_captions);	
-	}
+	//}
 
 	//protected methods
 	O.setHorizontalScaleAxis=function(opts) {setHorizontalScaleAxis(opts);};
