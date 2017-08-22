@@ -4,35 +4,35 @@ function MVCrossCorrelogramsView(O,mvcontext) {
 	MVHistogramGrid(O,mvcontext,pair_mode);
 	O.div().addClass('MVCrossCorrelogramsView');
 
-	this.setHistograms=function(histograms) {return setHistograms(histograms);};
-	this.setHistogramsUrl=function(url) {m_histograms_url=url;};
+	this.setCorrelograms=function(correlograms) {return setCorrelograms(correlograms);};
+	this.setCorrelogramsUrl=function(url) {m_correlograms_url=url;};
 
 	O.prepareCalculation=function() {prepareCalculation();};
 	O.runCalculation=function(opts,callback) {runCalculation(opts,callback);};
 	O.onCalculationFinished=function() {onCalculationFinished();};
 
-	var m_histograms={};
-	var m_histograms_url='';
+	var m_correlograms={};
+	var m_correlograms_url='';
 
 	var m_calculator=new MVCrossCorrelogramsViewCalculator();
 	function prepareCalculation() {
-		m_calculator.histograms_url=m_histograms_url;
+		m_calculator.correlograms_url=m_correlograms_url;
 	}
 	function runCalculation(opts,callback) {
 		m_calculator.run(opts,callback);
 	}
 	function onCalculationFinished() {
-		if (m_calculator.histograms) {
-			setHistograms(m_calculator.histograms);
+		if (m_calculator.correlograms) {
+			setCorrelograms(m_calculator.correlograms);
 		}
 	}
 
-	function setHistograms(histograms) {
-		m_histograms=JSON.parse(JSON.stringify(histograms));
+	function setCorrelograms(correlograms) {
+		m_correlograms=JSON.parse(JSON.stringify(correlograms));
 
-		var histogram_views=[];
-		for (var i in m_histograms) {
-			var HH=m_histograms[i];
+		var correlogram_views=[];
+		for (var i in m_correlograms) {
+			var HH=m_correlograms[i];
 			var k1=HH.k1||0;
 			var k2=HH.k2||0;
 			var dt_min_msec=HH.dt_min_msec||0;
@@ -46,10 +46,10 @@ function MVCrossCorrelogramsView(O,mvcontext) {
 			HV.setProperty('k1',k1);
 			HV.setProperty('k2',k2);
 			HV.setTitle(k1+'/'+k2);
-			histogram_views.push(HV);
+			correlogram_views.push(HV);
 		}
 
-    	O.setHistogramViews(histogram_views);
+    	O.setHistogramViews(correlogram_views);
 	}	
 
 	function make_data_to_generate_histogram(tmin,bin_size,counts) {
@@ -68,21 +68,21 @@ function MVCrossCorrelogramsViewCalculator() {
 	var that=this;
 
 	//input
-	this.histograms_url='';
+	this.correlograms_url='';
 
 	//output
-	this.histograms=null;
+	this.correlograms=null;
 
 	this.run=function(opts,callback) {
-		if (!that.histograms_url) {
+		if (!that.correlograms_url) {
 			callback({success:true});
 			return;
 		}
 
-		$.get(that.histograms_url,function(txt) {
+		$.get(that.correlograms_url,function(txt) {
 			console.log(txt);
 			var obj=JSON.parse(txt);
-			that.histograms=obj.histograms||null;
+			that.correlograms=obj.correlograms||null;
 			callback({success:true});
 		});
 

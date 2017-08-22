@@ -20,8 +20,8 @@ function jsqmain(query) {
                     container:'north',
                     label:'Templates'
                 },{
-                	view_type:'cross_correlograms',
-                	histograms_url:'http://river.simonsfoundation.org:60001/prvbucket/U7IEG0.autocorrelograms_ms2mn.json',
+                	view_type:'correlograms',
+                	correlograms_url:'http://river.simonsfoundation.org:60001/prvbucket/U7IEG0.autocorrelograms_ms2mn.json',
                 	container:'south',
                 	label:'Auto Correlograms'
                 }]};
@@ -61,12 +61,12 @@ function load_from_config(config) {
                 console.warn('No templates_url found for view_type='+view0.view_type);
             return X;
         }
-        else if (view0.view_type=='cross_correlograms') {
+        else if (view0.view_type=='correlograms') {
             var X=new MVCrossCorrelogramsView(0,mvcontext);
-            if (view0.histograms_url)
-                X.setHistogramsUrl(view0.histograms_url);
+            if (view0.correlograms_url)
+                X.setCorrelogramsUrl(view0.correlograms_url);
             else
-                console.warn('No histograms_url found for view_type='+view0.view_type);
+                console.warn('No correlograms_url found for view_type='+view0.view_type);
             return X;
         }
         else {
