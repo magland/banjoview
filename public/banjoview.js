@@ -19,17 +19,17 @@ function jsqmain(query) {
                     templates_url:'http://river.simonsfoundation.org:60001/prvbucket/templates0.mda',
                     container:'north',
                     label:'Templates'
+                },{
+                	view_type:'cross_correlograms',
+                	histograms_url:'http://river.simonsfoundation.org:60001/prvbucket/U7IEG0.autocorrelograms_ms2mn.json',
+                	container:'south',
+                	label:'Auto Correlograms'
                 }]};
         load_from_config(config);
     }
 }
 
 function load_from_config(config) {
-
-    if (!config) {
-        
-    }
-
     var mvcontext=new MVContext();
     var MW=new MVMainWindow(0,mvcontext);
     MW.showFullBrowser();
@@ -58,10 +58,21 @@ function load_from_config(config) {
             if (view0.templates_url)
                 X.setTemplatesUrl(view0.templates_url);
             else
-                console.warn('No templates_url found for view_type=templates');
+                console.warn('No templates_url found for view_type='+view0.view_type);
             return X;
         }
-        else return 0;
+        else if (view0.view_type=='cross_correlograms') {
+            var X=new MVCrossCorrelogramsView(0,mvcontext);
+            if (view0.histograms_url)
+                X.setHistogramsUrl(view0.histograms_url);
+            else
+                console.warn('No histograms_url found for view_type='+view0.view_type);
+            return X;
+        }
+        else {
+        	console.warn('Unrecognized view type: '+view0.view_type);
+        	return 0;
+        }
     }
 
     function get_container_from_index(i) {
