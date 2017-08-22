@@ -11,6 +11,9 @@ function MVCrossCorrelogramsView(O,mvcontext) {
 	O.runCalculation=function(opts,callback) {runCalculation(opts,callback);};
 	O.onCalculationFinished=function() {onCalculationFinished();};
 
+	//JSQ.connect(mvcontext,'currentClusterChanged',O,update_highlighting);
+	//JSQ.connect(mvcontext,'selectedClustersChanged',O,update_highlighting);
+
 	var m_correlograms={};
 	var m_correlograms_url='';
 

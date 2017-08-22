@@ -8,14 +8,14 @@ function MVHistogramGrid(O,mvcontext,pair_mode) {
 
 	JSQ.connect(O,'sizeChanged',O,update_layout);
 	JSQ.connect(mvcontext,'optionsChanged',O,O.recalculate);
-	if (pair_mode) {
-		JSQ.connect(mvcontext,'currentClusterPairChanged',O,do_highlighting_and_captions);
-		JSQ.connect(mvcontext,'selectedClusterPairsChanged',O,do_highlighting_and_captions);
-	}
-	else {
+	//if (pair_mode) {
+	//	JSQ.connect(mvcontext,'currentClusterPairChanged',O,do_highlighting_and_captions);
+	//	JSQ.connect(mvcontext,'selectedClusterPairsChanged',O,do_highlighting_and_captions);
+	//}
+	//else {
 		JSQ.connect(mvcontext,'currentClusterChanged',O,do_highlighting_and_captions);
 		JSQ.connect(mvcontext,'selectedClustersChanged',O,do_highlighting_and_captions);	
-	}
+	//}
 
 	//protected methods
 	O.setHorizontalScaleAxis=function(opts) {setHorizontalScaleAxis(opts);};
@@ -34,6 +34,7 @@ function MVHistogramGrid(O,mvcontext,pair_mode) {
 		m_panel_widget.setSize([ss[0]-10,ss[1]-10]);
 	}
 	function do_highlighting_and_captions() {
+		console.log('do_highlighting_and_captions');
 		var k=O.mvContext().currentCluster();
 		var ks=O.mvContext().selectedClusters();
 		for (var i=0; i<m_histogram_views.length; i++) {
