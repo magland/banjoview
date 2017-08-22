@@ -3,182 +3,260 @@ function FiringEventsView(O,mvcontext) {
 	MVAbstractView(O,mvcontext);
 	O.div().addClass('FiringEventsView');
 
-	this.setTemplates=function(templates) {return setTemplates(templates);};
-	this.setTemplatesUrl=function(url) {m_templates_url=url;};
+	this.setEvents=function(events) {return setEvents(events);};
+	this.setEventsUrl=function(url) {m_events_url=url;};
 
 	O.prepareCalculation=function() {prepareCalculation();};
 	O.runCalculation=function(opts,callback) {runCalculation(opts,callback);};
 	O.onCalculationFinished=function() {onCalculationFinished();};
 
+	O.onWheel(wheel);
+	O.onMousePress(mousePress);
+	O.onMouseRelease(mouseRelease);
+	O.onMouseMove(mouseMove);
+	O.onMouseEnter(mouseEnter);
+	O.onMouseLeave(mouseLeave);
+
 	JSQ.connect(O,'sizeChanged',O,update_layout);
-	JSQ.connect(mvcontext,'optionsChanged',O,O.recalculate);
-	JSQ.connect(mvcontext,'currentClusterChanged',O,update_highlighting);
-	JSQ.connect(mvcontext,'selectedClustersChanged',O,update_highlighting);
+	//JSQ.connect(mvcontext,'optionsChanged',O,O.recalculate);
+	//JSQ.connect(mvcontext,'currentClusterChanged',O,update_highlighting);
+	//JSQ.connect(mvcontext,'selectedClustersChanged',O,update_highlighting);
 
-	var m_panel_widget=new MVPanelWidget();
-	m_panel_widget.setParent(O);
-	var m_template_panels=[];
-	var m_vscale_factor=1;
-	var m_total_time_sec=0;
-	var m_templates_url='';
-
-	m_panel_widget.onPanelClicked(panelClicked);
-
-	var m_cluster_data=[];
-
+	var m_viewport=new FiringEventsViewport();
+	m_viewport.setParent(O);
+	var m_events_url='';
+	var m_events=new Mda(0,0);
+	var m_tmax=0;
+	
 	function update_layout() {
 		var ss=O.size();
-		m_panel_widget.setPosition([5,5]);
-		m_panel_widget.setSize([ss[0]-10,ss[1]-10]);
+		m_viewport.setPosition([5,5]);
+		m_viewport.setSize([ss[0]-10,ss[1]-10]);
 	}
-	function update_highlighting() {
-		var k=O.mvContext().currentCluster();
-		var ks=O.mvContext().selectedClusters();
-		for (var i=0; i<m_template_panels.length; i++) {
-			var Y=m_template_panels[i];
-			var k0=Y.property('k');
-			if (k0==k) Y.div().addClass('current');
-			else Y.div().removeClass('current');
-			if (k0 in ks) Y.div().addClass('selected');
-			else Y.div().removeClass('selected');
+
+	function setEvents(events) {
+		m_events=events;
+		auto_compute_y_range_and_tmax();
+		update_viewport();
+	}
+	function update_viewport() {
+		m_viewport.clearEvents();
+		for (var i=0; i<m_events.N2(); i++) {
+			var time0=m_events.value(1,i);
+			if (m_viewport.inTimeRange(time0)) {
+				var label0=m_events.value(2,i);
+				var amp0=m_events.value(3,i);
+				m_viewport.addEvent({time:time0,label:label0,amp:amp0});
+			}
 		}
 	}
 
-	function setTemplates(templates) {
-		var M=templates.N1();
-		var T=templates.N2();
-		var K=templates.N3();
-		m_cluster_data=[];
-		for (var k=1; k<=K; k++) {
-			var CD={
-				template0:templates.subArray(0,0,k-1,M,T,1),
-				k:k
-			};
-			m_cluster_data.push(CD);
+	function auto_compute_y_range_and_tmax() {
+		var minval=0;
+		var maxval=0;
+		m_tmax=0;
+		for (var i=0; i<m_events.N2(); i++) {
+			var t0=m_events.value(1,i);
+			var amp=m_events.value(3,i);
+			if (amp<minval) minval=amp;
+			if (amp>maxval) maxval=amp;
+			if (t0>m_tmax) m_tmax=t0;
 		}
-		update_panels();
+		m_viewport.setYRange(minval,maxval);
 	}
-	function update_panels() {
-		m_panel_widget.clearPanels();
-		m_template_panels=[];
-		for (var k=0; k<m_cluster_data.length; k++) {
-			var CD=m_cluster_data[k];
-			if (m_total_time_sec)
-				CD.firing_rate=CD.num_events/m_total_time_sec;
-			else
-				CD.firing_rate=0;
-			var Y=new FiringEventsViewPanel();
-			Y.setProperty('k',CD.k);
-			Y.setChannelColors(mvcontext.channelColors());
-			Y.setClusterData(CD);
-			m_panel_widget.addPanel(0,k,Y);
-			m_template_panels.push(Y);
-		}
-		update_scale_factors();
+
+	function zoom(factor) {
+		var tr=m_viewport.timeRange();
+		tr[1]=tr[1]*factor;
+		if (tr[1]>m_tmax) tr[1]=m_tmax;
+		m_viewport.setTimeRange(tr[0],tr[1]);
+		update_viewport();
 	}
-	function panelClicked(ind,modifiers) {
-		if (ind in m_template_panels) {
-			O.mvContext().clickCluster(m_template_panels[ind].property('k'),modifiers);
+
+	function wheel(evt) {
+		if (evt.delta>0) {
+			zoom(1/1.2);
 		}
+		else if (evt.delta<0) {
+			zoom(1.2);
+		}
+	}
+
+	var press_anchor=[-1,-1];
+	var press_anchor_trange=[-1,-1];
+	var is_dragging=false;
+	function mousePress(evt) {
+		press_anchor=JSQ.clone(evt.pos);
+		press_anchor_trange=[m_t1,m_t2];
+		is_dragging=false;
+	}
+	function mouseRelease(evt) {
+		press_anchor=[-1,-1];
+		if (!is_dragging) {
+			var coord=pix2coord(evt.pos[0],evt.pos[1]);
+			setCurrentTime(coord[0]);
+		}
+		is_dragging=false;
+	}
+	function mouseMove(evt) {
+		/*
+		if (press_anchor[0]>=0) {
+			var dx=evt.pos[0]-press_anchor[0];
+			var dy=evt.pos[1]-press_anchor[1];
+
+			if ((Math.abs(dx)>=4)||(Math.abs(dy)>=4)) {
+				is_dragging=true;
+			}
+			if (is_dragging) {
+				if (columnCount()>1) {
+					m_viewport_geom[0]=press_anchor_viewport_geom[0]+dx/O.size()[0];
+				}
+				if (rowCount()>1) {
+					m_viewport_geom[1]=press_anchor_viewport_geom[1]+dy/O.size()[1];
+				}
+				update_layout();
+			}
+		}
+		*/
+	}
+	function mouseEnter(evt) {
 
 	}
-	function min_template_value() {
-		var ret=0;
-		for (var i=0; i<m_cluster_data.length; i++) {
-			var CD=m_cluster_data[i];
-			ret=Math.min(ret,CD.template0.minimum());
-		}
-		return ret;
+	function mouseLeave(evt) {
+		press_anchor=[-1,-1];
 	}
-	function max_template_value() {
-		var ret=0;
-		for (var i=0; i<m_cluster_data.length; i++) {
-			var CD=m_cluster_data[i];
-			ret=Math.max(ret,CD.template0.maximum());
-		}
-		return ret;
-	}
-	function update_scale_factors() {
-		var min0=min_template_value();
-		var max0=max_template_value();
-		var maxabs=Math.max(Math.abs(min0),Math.abs(max0));
-		if (!maxabs) maxabs=1;
-		var factor=1/maxabs*m_vscale_factor;
-		for (var i=0; i<m_template_panels.length; i++) {
-			m_template_panels[i].setVerticalScaleFactor(factor);
-		}
-	}
+
+
 	function Calculator() {
 		var that=this;
 
     	//inputs
-    	this.templates_url;
+    	this.events_url;
 
     	//outputs
-    	this.templates=null;
+    	this.events=null;
 
     	this.run=function(opts,callback) {
 
-    		if (!that.templates_url) {
+    		if (!that.events_url) {
     			callback({success:true});
     			return;
     		}
 
     		var A=new Mda();
-    		A.load(that.templates_url,function(result) {
+    		A.load(that.events_url,function(result) {
     			if (!result.success) {
-    				callback({success:false,error:'Problem loading templates: '+result.error});
+    				callback({success:false,error:'Problem loading events: '+result.error});
     				return;
     			}
-				that.templates=A;
+				that.events=A;
 				callback({success:true});
-    		})
+    		});
 	    };
-	    function mda_from_base64(X) {
-	    	var buf=Base64Binary.decode(X).buffer;
-	    	var A=new Mda();
-	    	A.setFromArrayBuffer(buf);
-	    	return A;
-	    }
     }
     var m_calculator=new Calculator();
     function prepareCalculation() {
-    	m_calculator.templates_url=m_templates_url;
+    	m_calculator.events_url=m_events_url;
     }
     function runCalculation(opts,callback) {
     	m_calculator.run(opts,callback);
     }
     function onCalculationFinished() {
-    	if (m_calculator.templates) {
-			setTemplates(m_calculator.templates);
+    	if (m_calculator.events) {
+			setEvents(m_calculator.events);
 		}
     }
 
 	update_layout();
 }
 
-function FiringEventsViewPanel(O) {
+function FiringEventsViewport(O) {
 	O=O||this;
 	JSQCanvasWidget(O);
-	O.div().addClass('FiringEventsViewPanel');
+	O.div().addClass('FiringEventsViewport');
 
-	this.setChannelColors=function(list) {m_channel_colors=JSQ.clone(list);};
-	this.setClusterData=function(D) {m_CD=D;}; //don't clone because it has mda's
-	this.setVerticalScaleFactor=function(factor) {
-		m_vert_scale_factor=factor;
-		O.update();
-	};
-
-	var m_vert_scale_factor=1;
-	var m_channel_colors=[];
-	var m_CD={};
-	var m_top_rect = [0,0,0,0]; 
-	var m_template_rect = [0,0,0,0];
-	var m_bottom_rect = [0,0,0,0];
+	this.timeRange=function() {return [m_t1,m_t2];};
+	this.setTimeRange=function(t1,t2) {_setTimeRange(t1,t2);};
+	this.setYRange=function(y1,y2) {_setYRange(y1,y2);};
+	this.clearEvents=function() {_clearEvents();};
+	this.addEvent=function(evt) {_addEvent(evt);};
+	this.inTimeRange=function(t0) {return ((m_t1<=t0)&&(t0<=m_t2));};
+	this.setCurrentTime=function(t0) {m_current_time=t0; update();};
+	
+	var m_t1=0,m_t2=100000;
+	var m_y1=-1,m_y2=1;
+	var m_events_by_label={};
+	var m_current_time=8000;
 
 	O.onPaint(paint);
 
+	function _setTimeRange(t1,t2) {
+		if ((m_t1==t1)&&(m_t2==t2)) return;
+		m_t1=t1;
+		m_t2=t2;
+		O.update();
+	}
+	function _setYRange(y1,y2) {
+		if ((m_y1==y1)&&(m_y2==y2)) return;
+		m_y1=y1;
+		m_y2=y2;
+		O.update();
+	}
+	function _clearEvents() {
+		m_events_by_label={};
+		O.update();
+	}
+	function _addEvent(evt) {
+		if (!(evt.label in m_events_by_label))
+			m_events_by_label[evt.label]=[];
+		m_events_by_label[evt.label].push(evt);
+		O.update();
+	}
+
+	var s_colors=['blue','green','red','magenta'];
+	function get_color_for_label(k) {
+		return s_colors[k%s_colors.length];
+	}
+
 	function paint(painter) {
+		painter.fillRect(0,0,O.width(),O.height(),'lightgray');
+
+		var max_diam=5;
+		var min_diam=2;
+		var diam=max_diam;
+		if (m_t2>m_t1) diam=O.width()/(m_t2-m_t1)*50;
+		diam=Math.min(max_diam,Math.max(min_diam,diam));
+
+		for (var k in m_events_by_label) {
+			painter.setBrush({color:get_color_for_label(k)});
+			var evts=m_events_by_label[k];
+			var increment=Math.max(1,Math.floor(evts.length/1000));
+			for (var i=0; i<evts.length; i+=increment) {
+				var E=evts[i];
+				var pt0=coord2pix(E.time,E.amp);
+				var rect=[pt0[0]-diam/2,pt0[1]-diam/2,diam,diam];
+				painter.fillEllipse(rect);
+			}	
+		}
+
+		if (m_current_time>0) {
+			var pt1=coord2pix(m_current_time,m_y1);
+			var pt2=coord2pix(m_current_time,m_y2);
+
+			var pen=painter.pen();
+			pen.color='yellow'; pen.width=5;
+			painter.setPen(pen);
+			painter.drawLine(pt1[0],pt1[1],pt2[0],pt2[1]);
+
+			var pen=painter.pen();
+			pen.color='gray'; pen.width=1;
+			painter.setPen(pen);
+			painter.drawLine(pt1[0],pt1[1],pt2[0],pt2[1]);
+		}
+
+		
+		
+		/*
 		var template0=m_CD.template0;
 		var M=template0.N1();
 		var T=template0.N2();
@@ -231,7 +309,7 @@ function FiringEventsViewPanel(O) {
 			painter.drawLine(pt0[0],0,pt0[0],H0);
 		}
 
-		// render the templates
+		// render the events
 		for (var m=0; m<M; m++) {
 			var col=get_channel_color(m+1);
 			var pen=painter.pen(); pen.color=col; pen.width=1;
@@ -248,42 +326,40 @@ function FiringEventsViewPanel(O) {
 				painter.drawPath(ppath);
 			}
 		}
+		*/
 
 		
     }
 
-    function get_disksize_for_firing_rate(firing_rate) {
-    	return Math.min(1,Math.sqrt(firing_rate/10));
-    }
-
-    function coord2pix(m,t,val) {
-    	var template0=m_CD.template0;
-    	var M=template0.N1();
-    	var T=template0.N2();
+    var margx=0,margy=0;
+    function coord2pix(t,y) {
+    	if (m_t2<=m_t1) return [0,0];
+    	if (m_y2<=m_y1) return [0,0];
+    	var pctx=(t-m_t1)/(m_t2-m_t1);
+    	var pcty=1 - (y-m_y1)/(m_y2-m_y1);
     	var W0=O.size()[0];
     	var H0=O.size()[1];
-    	var pctx=0,pcty=0;
-    	if (T) pctx=(t+0.5)/T;
-    	if (M) pcty=(m+0.5-val*m_vert_scale_factor)/M;
-    	var margx=4,margy=5;
-    	var x0=m_template_rect[0]+margx+pctx*(m_template_rect[2]-margx*2);
-    	var y0=m_template_rect[1]+margy+pcty*(m_template_rect[3]-margy*2);
+    	var x0=margx+pctx*(W0-margx*2);
+    	var y0=margy+pcty*(H0-margy*2);
     	return [x0,y0];
     }
+    function pix2coord(x0,y0) {
+    	if (m_t2<=m_t1) return [0,0];
+    	if (m_y2<=m_y1) return [0,0];
 
-	function lighten(col,val) {
-		var ret=[col[0]*val,col[1]*val,col[2]*val];
-		ret=[Math.min(255,ret[0]),Math.min(255,ret[1]),Math.min(255,ret[2])];
-		return ret;
-	}
+/*
+    	var
+    	var pctx=(t-m_t1)/(m_t2-m_t1);
+    	var pcty=1 - (y-m_y1)/(m_y2-m_y1);
+    	var W0=O.size()[0];
+    	var H0=O.size()[1];
+    	var margx=0,margy=0;
+    	var x0=margx+pctx*(W0-margx*2);
+    	var y0=margy+pcty*(H0-margy*2);
+    	return [x0,y0];*/
+    }
 
-	function get_channel_color(m) {
-		if (m <= 0)
-	        return [0,0,0];
-	    if (m_channel_colors.length===0)
-	        return [0,0,0];
-	    return m_channel_colors[(m - 1) % m_channel_colors.length];	
-	}
+	
 }
 
 

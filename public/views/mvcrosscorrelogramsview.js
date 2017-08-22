@@ -83,7 +83,6 @@ function MVCrossCorrelogramsViewCalculator() {
 		}
 
 		$.get(that.correlograms_url,function(txt) {
-			console.log(txt);
 			var obj=JSON.parse(txt);
 			that.correlograms=obj.correlograms||null;
 			callback({success:true});

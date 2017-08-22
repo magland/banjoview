@@ -20,9 +20,14 @@ function jsqmain(query) {
                     container:'north',
                     label:'Templates'
                 },{
+		    		view_type:'firing_events',
+		    		events_url:'http://river.simonsfoundation.org:60001/prvbucket/_mountainprocess/output_firings_out_881f814d85',
+		    		container:'south',
+		    		label:'Firing events'
+		    	},{
                 	view_type:'correlograms',
-                	correlograms_url:'http://river.simonsfoundation.org:60001/prvbucket/U7IEG0.autocorrelograms_ms2mn.json',
-                	container:'south',
+                	correlograms_url:'http://river.simonsfoundation.org:60001/prvbucket/XC39L9.autocorrelograms_ms2mn.json',
+                	container:'north',
                 	label:'Auto Correlograms'
                 }]};
         load_from_config(config);
@@ -69,6 +74,17 @@ function load_from_config(config) {
                 console.warn('No correlograms_url found for view_type='+view0.view_type);
             return X;
         }
+        else if (view0.view_type=='firing_events') {
+            var X=new FiringEventsView(0,mvcontext);
+            if (view0.events_url)
+                X.setEventsUrl(view0.events_url);
+            else {
+            	var test=make_test_events();
+            	X.setEvents(test);
+                //console.warn('No correlograms_url found for view_type='+view0.view_type);
+            }
+            return X;
+        }
         else {
         	console.warn('Unrecognized view type: '+view0.view_type);
         	return 0;
@@ -94,4 +110,18 @@ function load_from_config(config) {
         X.loadStaticView(obj);
         return X;
     }
+}
+
+function make_test_events() {
+	var L=200;
+	var X=new Mda(4,L);
+	for (var i=0; i<L; i++) {
+		var t0=i/L*1000;
+		var k0=1;
+		var amp0=Math.random()*2-1;
+		X.setValue(t0,1,i);
+		X.setValue(k0,2,i);
+		X.setValue(amp0,3,i);
+	}
+	return X;
 }
