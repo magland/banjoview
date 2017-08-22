@@ -21,7 +21,7 @@ function jsqmain(query) {
                     label:'Templates'
                 },{
 		    		view_type:'firing_events',
-		    		events_url:'http://river.simonsfoundation.org:60001/prvbucket/_mountainprocess/output_firings_out_881f814d85',
+		    		firing_events_url:'http://river.simonsfoundation.org:60001/prvbucket/_mountainprocess/output_firings_out_881f814d85',
 		    		container:'south',
 		    		label:'Firing events'
 		    	},{
@@ -76,8 +76,8 @@ function load_from_config(config) {
         }
         else if (view0.view_type=='firing_events') {
             var X=new FiringEventsView(0,mvcontext);
-            if (view0.events_url)
-                X.setEventsUrl(view0.events_url);
+            if (view0.firing_events_url)
+                X.setEventsUrl(view0.firing_events_url);
             else {
             	var test=make_test_events();
             	X.setEvents(test);

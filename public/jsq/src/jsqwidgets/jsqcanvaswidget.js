@@ -56,6 +56,9 @@ function JSQCanvasPainter(canvas) {
 	};
 	this._finalize=function() {
 	};
+	this.clearRect=function(x,y,W,H) {
+		ctx.clearRect(x,y,W,H);
+	};
 	this.fillRect=function(x,y,W,H,brush) {
 		if (typeof brush === 'string') brush={color:brush};
 		if (!('color' in brush)) brush={color:brush};
