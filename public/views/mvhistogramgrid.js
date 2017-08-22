@@ -34,7 +34,6 @@ function MVHistogramGrid(O,mvcontext,pair_mode) {
 		m_panel_widget.setSize([ss[0]-10,ss[1]-10]);
 	}
 	function do_highlighting_and_captions() {
-		console.log('do_highlighting_and_captions');
 		var k=O.mvContext().currentCluster();
 		var ks=O.mvContext().selectedClusters();
 		for (var i=0; i<m_histogram_views.length; i++) {
