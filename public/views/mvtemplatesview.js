@@ -50,11 +50,14 @@ function MVTemplatesView(O,mvcontext) {
 		var K=templates.N3();
 		m_cluster_data=[];
 		for (var k=1; k<=K; k++) {
-			var CD={
-				template0:templates.subArray(0,0,k-1,M,T,1),
-				k:k
-			};
-			m_cluster_data.push(CD);
+			var template0=templates.subArray(0,0,k-1,M,T,1);
+			if ((template0.minimum()!=0)||(template0.maximum()!=0)) {
+				var CD={
+					template0:template0,
+					k:k
+				};
+				m_cluster_data.push(CD);
+			}
 		}
 		update_panels();
 	}
