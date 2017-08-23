@@ -15,6 +15,10 @@ function JSQCore() {
 	this._addObject=function(id,obj) {addObject(id,obj);};
 	this._removeObject=function(id) {removeObject(id);};
 
+	this._report_mouse_press=function(W) {_report_mouse_press(W);};
+	this._widget_has_focus=function(W) {return (W.objectId() in m_focused_widget_ids_set);};
+	this._handle_key_press=function(e) {_handle_key_press(e);};
+
 	function connect(sender,signal_name,receiver,callback,connection_type) {
 		m_connection_manager.connect(sender,signal_name,receiver,callback,connection_type);
 	}
@@ -61,6 +65,28 @@ function JSQCore() {
 			ret[list[i]]=1;
 		}
 		return ret;
+	}
+	var m_focused_widget_ids=[];
+	var m_focused_widget_ids_set={};
+	var m_last_mouse_press_group=0;
+	var m_mouse_press_group=1;
+	function _report_mouse_press(W,timestamp) {
+		if (m_mouse_press_group!=m_last_mouse_press_group) {
+			m_last_mouse_press_group=m_mouse_press_group;
+			m_focused_widget_ids=[];
+			m_focused_widget_ids_set={};
+			setTimeout(function() {m_mouse_press_group=m_last_mouse_press_group+1},1);
+		}
+		m_focused_widget_ids.push(W.objectId());
+		m_focused_widget_ids_set[W.objectId()]=true;
+	}
+	function _handle_key_press(e) {
+		for (var j=0; j<m_focused_widget_ids.length; j++) {
+			var obj=object(m_focused_widget_ids[j]);
+			if (obj) {
+				obj.emit('keyPress',{event:e,key:e.which});
+			}
+		}
 	}
 
 	var m_connection_manager=new JSQConnectionManager();

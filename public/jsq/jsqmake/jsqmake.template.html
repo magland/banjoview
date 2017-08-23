@@ -8,6 +8,9 @@
 $INCLUDES$
 <script>
 $(document).ready(function() {
+	$('body').keydown(function(e) {
+		JSQ._handle_key_press(e);
+	});
 	var query=parse_url_params();
 	jsqmain(query);
 });

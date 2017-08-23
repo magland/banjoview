@@ -127,7 +127,8 @@ function MVContext(O) {
     	}
     	else {
     		//O.setSelectedClusterPairs({});
-    		O.setSelectedClusters({});
+            var tmp={}; tmp[k]=1;
+    		O.setSelectedClusters(tmp);
     		O.setCurrentCluster(k);
     	}
     }

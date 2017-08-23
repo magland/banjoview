@@ -16,8 +16,10 @@ function FiringEventsView(O,mvcontext) {
 	O.onMouseMove(mouseMove);
 	O.onMouseEnter(mouseEnter);
 	O.onMouseLeave(mouseLeave);
+	O.onKeyPress(keyPress);
 
 	JSQ.connect(O,'sizeChanged',O,update_layout);
+	JSQ.connect(mvcontext,'selectedClustersChanged',O,update_layout);
 	//JSQ.connect(mvcontext,'optionsChanged',O,O.recalculate);
 	//JSQ.connect(mvcontext,'currentClusterChanged',O,update_highlighting);
 	//JSQ.connect(mvcontext,'selectedClustersChanged',O,update_highlighting);
@@ -30,6 +32,8 @@ function FiringEventsView(O,mvcontext) {
 	var m_events_url='';
 	var m_events=new Mda(0,0);
 	var m_tmax=0;
+	var m_selected_clusters={};
+	update_layout();
 	
 	function update_layout() {
 		var ss=O.size();
@@ -37,18 +41,20 @@ function FiringEventsView(O,mvcontext) {
 		m_viewport.setSize([ss[0]-10,ss[1]-10]);
 		m_overlay.setPosition([5,5]);
 		m_overlay.setSize([ss[0]-10,ss[1]-10]);
+		update_viewport();
 	}
 
 	function setEvents(events) {
 		m_events=events;
 		auto_compute_y_range_and_tmax();
-		m_viewport.setTimeRange(0,Math.min(30000*1000,m_tmax));
+		m_viewport.setTimeRange(0,Math.min(30000*60*60,m_tmax));
 		update_viewport();
 	}
 	var global_update_viewport_code=0;
 	function update_viewport() {
 		global_update_viewport_code++;
 		var local_update_viewport_code=global_update_viewport_code;
+		m_selected_clusters=mvcontext.selectedClusters();
 		m_viewport.clearEvents();
 		var timer=new Date();
 		var timerange=m_viewport.timeRange();
@@ -74,7 +80,12 @@ function FiringEventsView(O,mvcontext) {
 			var time0=m_events.value(1,i);
 			var label0=m_events.value(2,i);
 			var amp0=m_events.value(3,i);
-			m_viewport.addEvent({time:time0,label:label0,amp:amp0});
+
+			var use_all=$.isEmptyObject(m_selected_clusters);
+
+			if ((label0 in m_selected_clusters)||(use_all)) {
+				m_viewport.addEvent({time:time0,label:label0,amp:amp0});
+			}
 		}
 	}
 
@@ -136,6 +147,13 @@ function FiringEventsView(O,mvcontext) {
 		//if ((t1<tr[0])||(t2>tr[1])) //only update the events in the viewport if we have potentially new data
 			update_viewport();
 	}
+	function vertical_zoom(factor) {
+		var yr=m_viewport.yRange();
+		yr[0]=yr[0]/factor;
+		yr[1]=yr[1]/factor;
+		m_viewport.setYRange(yr[0],yr[1]);;
+		update_viewport();
+	}
 
 	function wheel(evt) {
 		if (evt.delta>0) {
@@ -193,6 +211,28 @@ function FiringEventsView(O,mvcontext) {
 	}
 	function mouseLeave(evt) {
 		press_anchor=[-1,-1];
+	}
+	function keyPress(evt) {
+		var key0=evt.key;
+		console.log(key0);
+		if (key0==38) { //up
+			vertical_zoom(1.2);
+		}
+		else if (key0==40) { //down
+			vertical_zoom(1/1.2);
+		}
+		else if (key0==39) { //left
+			//zoom(1.2);
+		}
+		else if (key0==40) { //right
+			//zoom(1.2);
+		}
+		else if (key0==187) { //plus (or equals)
+			zoom(1/1.2);
+		}
+		else if (key0==189) { //minus
+			zoom(1.2);
+		}
 	}
 
 

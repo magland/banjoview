@@ -16,6 +16,7 @@ function JSQWidget(O) {
 	O.setParent=function(parent) {setParent(parent);};
 	O.parentWidget=function() {return parentWidget();};
 	O.setVisible=function(visible) {setVisible(visible);};
+	O.hasFocus=function() {return hasFocus();};
 
 	O.onMousePress=function(handler) {onMousePress(handler);};
 	O.onMouseRelease=function(handler) {onMouseRelease(handler);};
@@ -23,6 +24,7 @@ function JSQWidget(O) {
 	O.onMouseEnter=function(handler) {onMouseEnter(handler);};
 	O.onMouseLeave=function(handler) {onMouseLeave(handler);};
 	O.onWheel=function(handler) {onWheel(handler);};
+	O.onKeyPress=function(handler) {onKeyPress(handler);};
 
 	JSQ.connect(O,'destroyed',O,on_destroyed);
 	function on_destroyed() {
@@ -30,7 +32,7 @@ function JSQWidget(O) {
 	}
 
 	function connect_div() {
-		m_div.mousedown(function(e) {mouse_actions.emit('press',jq_mouse_event($(this),e));});
+		m_div.mousedown(function(e) {JSQ._report_mouse_press(O); mouse_actions.emit('press',jq_mouse_event($(this),e));});
 		m_div.mouseup(function(e) {mouse_actions.emit('release',jq_mouse_event($(this),e));});
 		m_div.mousemove(function(e) {mouse_actions.emit('move',jq_mouse_event($(this),e));});
 		m_div.mouseenter(function(e) {mouse_actions.emit('enter',jq_mouse_event($(this),e));});
@@ -136,6 +138,11 @@ function JSQWidget(O) {
 			handler(args);
 		});
 	}
+	function onKeyPress(handler) {
+		JSQ.connect(O,'keyPress',O,function(sender,args) {
+			handler(args);
+		});
+	}
 	function onWheel(handler) {
 		JSQ.connect(wheel_actions,'wheel',O,function(sender,args) {
 			handler(args);
@@ -159,6 +166,9 @@ function JSQWidget(O) {
 	function setVisible(visible) {
 		if (visible) m_div.css({visibility:'visible'});
 		else m_div.css({visibility:'hidden'});
+	}
+	function hasFocus() {
+		return JSQ._widget_has_focus(O);
 	}
 
 	O._set_is_widget(true);
