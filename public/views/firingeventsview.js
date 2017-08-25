@@ -47,7 +47,8 @@ function FiringEventsView(O,mvcontext) {
 	function setEvents(events) {
 		m_events=events;
 		auto_compute_y_range_and_tmax();
-		m_viewport.setTimeRange(0,Math.min(30000*60*60,m_tmax));
+		//m_viewport.setTimeRange(0,Math.min(30000*60*60,m_tmax));
+		m_viewport.setTimeRange(0,m_tmax);
 		update_viewport();
 	}
 	var global_update_viewport_code=0;
