@@ -6,6 +6,9 @@ function HistogramView(O) {
 	O.setSecondData=function(data) {m_second_data=data.slice();};
 	O.setBins=function(bin_min,bin_max,num_bins) {setBins(bin_min,bin_max,num_bins);};
 	O.autoSetBins=function(num_bins) {autoSetBins(num_bins);};
+
+    O.setBinCentersAndCounts=function(bin_centers,bin_counts) {setBinCentersAndCounts(bin_centers,bin_counts);};
+
     O.setDrawVerticalAxisAtZero=function(val) {m_draw_vertical_axis_at_zero=val;};
     O.setXRange=function(min0,max0) {m_xrange=[min0,max0]; O.update();};
     O.autoCenterXRange=function() {autoCenterXRange();};
@@ -103,6 +106,18 @@ function HistogramView(O) {
     			}
     		}
     	}
+    }
+
+    function setBinCentersAndCounts(bin_centers,bin_counts) {
+        m_bin_centers=bin_centers;
+        m_bin_counts=bin_counts;
+        m_num_bins=m_bin_counts.length;
+        m_max_bin_count=0;
+        for (var i=0; i<m_bin_counts.length; i++) {
+            if (m_bin_counts[i]>m_max_bin_count)
+                m_max_bin_count=m_bin_counts[i];
+        }
+        O.update();
     }
 
 	function paint(painter) {
