@@ -22,7 +22,7 @@ opts.SCRIPTS.push(
 
 //////////////////////////////////////////////////////////////////////
 opts.TARGET = 'index.html';
-opts.SCRIPTS.push('banjoview.js');
+opts.SCRIPTS.push('banjoview.js','localstorage.js');
 opts.STYLESHEETS.push('banjoview.css');
 
 
@@ -49,6 +49,16 @@ opts.SCRIPTS.push(
 opts.SOURCEPATH.push('controlwidgets')
 opts.SCRIPTS.push(
 	'generalcontrolwidget.js'
+);
+
+opts.SOURCEPATH.push('banjocreate')
+opts.SCRIPTS.push(
+	'banjocreate.js','jquery-ui.min.js','banjocreatemainwindow.js','prvlistwidget.js','prvlistmanager.js',
+	'upload_file.js','make_editable.js','processlistwidget.js','processlistmanager.js','editprocessdialog.js',
+	'processormanager.js'
+);
+opts.STYLESHEETS.push(
+	'banjocreate.css','jquery-ui.min.css'
 );
 
 //////////////////////////////////////////////////////////////////////

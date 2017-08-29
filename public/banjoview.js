@@ -1,4 +1,18 @@
 function jsqmain(query) {
+    query=query||{};
+
+    if ((query.mode||'')=='create') {
+        var LS=new LocalStorage();
+        var X=new BanjoCreateMainWindow(0);
+        X.load(LS.readObject('BanjoCreateMainWindow'));
+        X.showFullBrowser();
+
+        JSQ.connect(X,'save',0,function() {
+            LS.writeObject('BanjoCreateMainWindow',X.save());
+        });
+        return;
+    }
+
     console.log('query='+JSON.stringify(query));
     var config=null;
     var config_str=query.config||'';
