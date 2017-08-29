@@ -1,4 +1,6 @@
 function JSContext() {
+  var that=this;
+
   this.btoa=function(str) {
     return btoa(str);
   };
@@ -8,7 +10,7 @@ function JSContext() {
     },'json');
   };
   this.http_get_json=function(url,callback) {
-    http_get_text(url,function(tmp) {
+    that.http_get_text(url,function(tmp) {
       if (!tmp.success) {
         callback(tmp);
         return;

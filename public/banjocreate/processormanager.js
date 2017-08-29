@@ -26,7 +26,7 @@ function ProcessorManager(O) {
 			var P=processors[i];
 			if (P.name==processor_name) return P;
 		}
-		return {};
+		return null;
 	}
 }
 

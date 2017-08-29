@@ -8,7 +8,11 @@
   color:darkblue
 }
 .editable {
-  border:solid 1px lightgray
+  border:solid 1px lightgray;
+  padding-left:7px;
+  padding-right:7px;
+  padding-top:3px;
+  padding-bottom:3px;
 }
 
 .remove_button:after {
@@ -28,6 +32,16 @@ content: 'edit';
   color:#700;
 }
 .edit_button:hover {
+  color:#f00;
+}
+
+.run_button:after {
+content: 'run';
+}
+.run_button {
+  color:#700;
+}
+.run_button:hover {
   color:#f00;
 }
 
@@ -52,6 +66,7 @@ content: 'edit';
 	text-align: left;
 	padding: 6px 6px 6px 12px;
 	//background: #CAE8EA url(images/bg_header.jpg) no-repeat;
+	font-size: 18px;
 }
 
 .Table1 > tbody > tr > td {
@@ -66,8 +81,12 @@ content: 'edit';
     font-size: 12px;
 }
 
+.large {
+	font-size: 20px;
+}
+
 .small {
-	font-size: 10px;
+	font-size: 12px;
 }
 
 .Table2 > tbody > tr > th {
@@ -76,4 +95,8 @@ content: 'edit';
 
 .Table2 > tbody > tr > td {
 	
+}
+
+input {
+	font-size: 24px;
 }

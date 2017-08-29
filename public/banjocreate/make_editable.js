@@ -27,8 +27,12 @@ function make_editable(elmt,on_edit_complete) {
       elmt.removeClass('editing');
       var edit_input=elmt.find('.edit_input');
       var val=edit_input.val();
-      elmt.html(val);
-      if (on_edit_complete)
+      if (on_edit_complete) {
         on_edit_complete(val);
+        elmt.html('');
+      }
+      else {
+        elmt.html(val);
+      }
     }
 }

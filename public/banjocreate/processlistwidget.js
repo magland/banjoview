@@ -14,33 +14,48 @@ function ProcessListWidget(O,process_list_manager,processor_manager) {
  
   function refresh() {
     m_table.empty();
-    m_table.append('<tr><th/><th>Processor name</th><th>Inputs</th><th>Outputs</th><th>Parameters</th></tr>')
+    m_table.append('<tr><th/><th>Processor name</th><th>Inputs</th><th>Outputs</th><th>Parameters</th></tr>');
     for (var i=0; i<PM.processCount(); i++) {
       var process=PM.process(i);
       var tr=create_process_table_row(i,process);
       m_table.append(tr);
     }
     var tr0=$('<tr><td/><td id=add></td><td /><td /><td /></tr>');
-    var add_button=$('<a id=add href="#">Add process</a>');
+    var add_button=$('<a class=large id=add href="#">Add process</a>');
     add_button.click(add_process);
     tr0.find('#add').append(add_button);
     m_table.append(tr0);
   }
   
   function create_process_table_row(i,process) {
-      var tr=$('<tr><td id=buttons></td><td><span id=processor_name></span></td><td id=inputs></td><td id=outputs></td><td id=parameters></td></tr>');
+      var tr=$('<tr><td id=buttons></td><td><span class=large id=processor_name></span></td><td id=inputs></td><td id=outputs></td><td id=parameters></td></tr>');
       m_table.append(tr);
       tr.find('#processor_name').html(process.processor_name||'');
+      tr.find('#inputs').append(create_inputs_cell(process.inputs||{}));
+      tr.find('#outputs').append(create_inputs_cell(process.outputs||{}));
+      tr.find('#parameters').append(create_inputs_cell(process.parameters||{}));
 
       var remove_button=$('<a class=remove_button />');
       tr.find('#buttons').append(remove_button);
       remove_button.click(function() {ask_remove_process(i);});
 
-      tr.find('#buttons').append(' ');
-
+      tr.find('#buttons').append('<br/>');
       var edit_button=$('<a class=edit_button />');
       tr.find('#buttons').append(edit_button);
       edit_button.click(function() {edit_process(i);});
+
+      tr.find('#buttons').append('<br/>');
+      var run_button=$('<a class=run_button />');
+      tr.find('#buttons').append(run_button);
+      run_button.click(function() {run_process(i);});
+  }
+  function create_inputs_cell(X) {
+    var ret=$('<div />');
+    for (var name in X) {
+      var val=X[name];
+      ret.append(name+':'+val+'<br/>');
+    }
+    return ret;
   }
     
   function ask_remove_process(i) {
@@ -51,11 +66,20 @@ function ProcessListWidget(O,process_list_manager,processor_manager) {
   }
       
   function add_process() {
-    var processor_name=prompt('Processor name:');
-    if (!processor_name) return;
-    var P=make_default_process(processor_name);
-    PM.addProcess(P);
-    edit_process(PM.processCount()-1);
+    select_processor_name(function(processor_name) {
+      if (!processor_name) return;
+      var P=make_default_process(processor_name);
+      PM.addProcess(P);
+      PM.emit('save');
+      edit_process(PM.processCount()-1);
+    });
+  }
+  function select_processor_name(callback) {
+    var X=new SelectProcessorDialog(0,processor_manager);
+    JSQ.connect(X,'accepted',O,function() {
+      callback(X.processorName());
+    });
+    X.show();
   }
   function make_default_process(processor_name) {
     var P={processor_name:processor_name,inputs:{},outputs:{},parameters:{}};
@@ -78,14 +102,25 @@ function ProcessListWidget(O,process_list_manager,processor_manager) {
 
   function edit_process(i) {
     var P=PM.process(i);
-    console.log('Edit process: '+P.processor_name);
 
     var X=new EditProcessDialog(0);
-    X.setProcess(PM.process(i));
+    var spec=processor_manager.processorSpec(P.processor_name);
+    if (!spec) {
+      alert('Unable to find spec for processor: '+P.processor_name);
+      return;
+    }
+    X.setProcessorSpec(spec);
+    X.setProcess(P);
     X.show();
     JSQ.connect(X,'accepted',O,function() {
       PM.setProcess(i,X.process());
+      PM.emit('save');
     });
+  }
+
+  function run_process(i) {
+    var P=PM.process(i);
+    O.emit('run_process',{process:P});
   }
 
   refresh();

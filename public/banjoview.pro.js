@@ -55,7 +55,7 @@ opts.SOURCEPATH.push('banjocreate')
 opts.SCRIPTS.push(
 	'banjocreate.js','jquery-ui.min.js','banjocreatemainwindow.js','prvlistwidget.js','prvlistmanager.js',
 	'upload_file.js','make_editable.js','processlistwidget.js','processlistmanager.js','editprocessdialog.js',
-	'processormanager.js'
+	'processormanager.js','selectprocessordialog.js','processmanager.js','jscontext.js','banjogenerator.js'
 );
 opts.STYLESHEETS.push(
 	'banjocreate.css','jquery-ui.min.css'
