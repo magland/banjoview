@@ -1,4 +1,4 @@
-function SelectProcessorDialog(O,processor_manager) {
+function SelectProcessorDialog(O,context) {
 	O=O||this;
 	JSQWidget(O);
 	O.div().addClass('SelectProcessorDialog');
@@ -25,7 +25,7 @@ function SelectProcessorDialog(O,processor_manager) {
 	function show() {
 		m_select.empty();
 		m_select.append('<option value="">(Select processor)</option>');
-		var names=processor_manager.processorNames();
+		var names=context.processor_manager.processorNames();
 		for (var i in names) {
 			var processor_name=names[i];
 			m_select.append('<option value="'+processor_name+'">'+processor_name+'</option>');

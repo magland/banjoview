@@ -1,6 +1,8 @@
-function PrvListManager(O,jscontext) {
+function PrvListManager(O,context) {
   O=O||this;
   JSQObject(O);
+
+  var category='PrvListManager';
   
   this.setServerUrl=function(url) {m_server_url=url;};  
   this.setPrvRecord=function(name,prv_record) {m_prv_records[name]=prv_record; O.emit('changed');};
@@ -15,7 +17,6 @@ function PrvListManager(O,jscontext) {
   this.save=function() {return save();};
   
   var m_prv_records={};
-  var m_server_url='http://river.simonsfoundation.org:60001';
   
   function prvRecordNames() {
     var ret=[];
@@ -41,14 +42,20 @@ function PrvListManager(O,jscontext) {
     }
   }
   function check_on_server(name,prv) {
+    var jscontext=context.jscontext;
     var obj=prv.content;
-    var url=m_server_url+'/prvbucketserver?a=locate&checksum='+obj.original_checksum+'&size='+obj.original_size+'&fcs='+obj.original_fcs;   
-    jscontext.http_get_text(url,function(resp) {
+    var banjoserver_url=context.banjoserver.url;
+    var url=banjoserver_url+'/banjoserver?a=prv-locate&checksum='+obj.original_checksum+'&size='+obj.original_size+'&fcs='+obj.original_fcs;   
+    if (context.banjoserver.passcode) url+='&passcode='+context.banjoserver.passcode;
+    jscontext.http_get_json(url,function(resp) {
       var val=undefined;
       if (resp.success) {
-        var txt=resp.text;
-        if (starts_with(txt,'http')) val=true;
-        else if (txt=='<not found>') val=false;
+        if (resp.object.found) val=true;
+        else val=false;
+      }
+      else {
+        context.log(category,'Problem with request: '+url);
+        context.log(category,JSON.stringify(resp));
       }
       if (prv.on_server!==val) {
         prv.on_server=val;
@@ -71,9 +78,11 @@ function PrvListManager(O,jscontext) {
     var prvs=obj.prvs||{};
     if (prvs) {
       for (var name in prvs) {
+        prvs[name].on_server=undefined;
         O.setPrvRecord(name,prvs[name]);
       }
     }
+    O.checkOnServer();
   }
   function save() {
     var obj={};

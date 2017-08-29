@@ -1,4 +1,4 @@
-function ProcessListManager(O) {
+function ProcessListManager(O,context) {
   O=O||this;
   JSQObject(O);
   

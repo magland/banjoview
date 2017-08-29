@@ -1,4 +1,4 @@
-function ProcessorManager(O) {
+function ProcessorManager(O,context) {
 	O=O||this;
 	JSQObject(O);
 

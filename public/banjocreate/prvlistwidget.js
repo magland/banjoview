@@ -1,18 +1,18 @@
-function PrvListWidget(O,prv_manager) {
+function PrvListWidget(O,context) {
   O=O||this;
   JSQWidget(O);
   O.div().addClass('PrvListWidget');
   O.div().addClass('ListWidget');
 
-  var PM=prv_manager;
   var m_table=$('<table class=Table1></table>');
   
   O.div().append(m_table);
   O.div().css({overflow:"auto"});
       
-  JSQ.connect(PM,'changed',O,refresh);
+  JSQ.connect(context.prv_list_manager,'changed',O,refresh);
  
   function refresh() {
+    var PM=context.prv_list_manager;
     m_table.empty();
     m_table.append('<tr><th/><th>Prv name</th><th>On server</th><th>Size (MB)</th><th>Original fname</th><th>Checksum</th><th>Fast checksum</th></tr>')
     var names=PM.prvRecordNames();
@@ -29,6 +29,7 @@ function PrvListWidget(O,prv_manager) {
   }
   
   function create_prv_table_row(name) {
+      var PM=context.prv_list_manager;
       var prv=PM.prvRecord(name);
       var content=prv.content||{};
       
@@ -53,6 +54,7 @@ function PrvListWidget(O,prv_manager) {
   }
     
   function ask_remove_prv(name) {
+    var PM=context.prv_list_manager;
     if (confirm('Remove prv ('+name+')?')) {
       PM.removePrvRecord(name);
       PM.emit('save');
@@ -60,6 +62,7 @@ function PrvListWidget(O,prv_manager) {
   }
       
   function upload_prv() {
+    var PM=context.prv_list_manager;
     var pp={
       multiple_files_mode:false,
       text_mode:true,
@@ -99,6 +102,7 @@ function PrvListWidget(O,prv_manager) {
   }
   
   function get_default_name() {
+    var PM=context.prv_list_manager;
     var names=PM.prvRecordNames();
     var num=1;
     while (names.indexOf('prv'+num)>=0) num++;
