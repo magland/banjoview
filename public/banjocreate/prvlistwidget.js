@@ -110,6 +110,15 @@ function PrvListWidget(O,prv_manager) {
       else if (val===false) return '<span class=no>No</span>';
       else return '<span class=unknown>Unknown</span>';
   }
+
+  function starts_with(str,str2) {
+    return (str.slice(0,str2.length)==str2);
+  }
+
+  function ends_with(str,str2) {
+    if (str2.length>str.length) return false;
+    return (str.slice(str.length-str2.length)==str2);
+  }
     
   refresh();
 }
