@@ -10,20 +10,8 @@ function BanjoCreateMainWindow(O) {
 
   var context={};
 
-  context.banjoserver={url:'',passcode:''};
+  context.config={kulele_url:'http://kulele.herokuapp.com',server:''};
 
-  /*
-  context.banjoserver={
-    url:'http://localhost:60002',
-    passcode:'pc3'
-  };
-  */
-  /*
-  context.banjoserver={
-    url:'http://river.simonsfoundation.org:60002',
-    passcode:'piver'
-  };
-  */
   var banjo_log=new BanjoLog();
   context.log=function(category,text) {banjo_log.message(category,text);};
   var m_log_widget=new BanjoLogWidget(0,banjo_log);
@@ -53,7 +41,7 @@ function BanjoCreateMainWindow(O) {
   JSQ.connect(context.process_list_manager,'save',O,function() {O.emit('save');});
   JSQ.connect(context.prv_list_manager,'save',O,function() {O.emit('save');});
 
-  JSQ.connect(m_control_widget,'config_banjoserver',O,configure_banjoserver);
+  JSQ.connect(m_control_widget,'config_server',O,configure_server);
   //JSQ.connect(m_create_banjo_view_widget,'save',O,saveToLocalStorage);
   //JSQ.connect(m_control_widget,'share',O,share);
 
@@ -107,19 +95,21 @@ function BanjoCreateMainWindow(O) {
       PrvListManager:context.prv_list_manager.save()//,
       //CreateView:m_create_banjo_view_widget.save()
     };
-    obj.banjoserver={url:context.banjoserver.url,passcode:context.banjoserver.passcode};
+    obj.config={};
+    obj.config.kulele_url=context.config.kulele_url;
+    obj.config.server=context.config.server;
     return obj;
   }
   function load(obj) {
-    if (obj.banjoserver) {
-      context.banjoserver.url=obj.banjoserver.url;
-      context.banjoserver.passcode=obj.banjoserver.passcode;
+    if (obj.config) {
+      context.config.server=obj.config.server;
+      context.config.kulele_url=obj.config.kulele_url;
     }
     context.process_list_manager.load(obj.ProcessListManager||{});
     context.prv_list_manager.load(obj.PrvListManager||{});
     //m_create_banjo_view_widget.load(obj.CreateView||{});
-    if (!context.banjoserver.url) {
-      context.log(category,'The banjoserver url is empty. You must set up the banjoserver.');
+    if (!context.config.server) {
+      context.log(category,'The config.server has not been set. You must set the server.');
     }
   }
 
@@ -132,9 +122,9 @@ function BanjoCreateMainWindow(O) {
     });
   }
 
-  function configure_banjoserver() {
-    context.banjoserver.url=prompt('Banjoserver url:');
-    context.banjoserver.passcode=prompt('Passcode:');
+  function configure_server() {
+    context.config.kulele_url=prompt('kulele url:',context.config.kulele_url);
+    context.config.server=prompt('Server:',context.config.server);
     context.prv_list_manager.checkOnServer();
     O.emit('save');
   }
@@ -165,9 +155,9 @@ function ControlWidget(O,context) {
   O=O||this;
   JSQWidget(O);
 
-  var config_banjoserver_button=$('<button>Configure banjoserver</button>');
-  config_banjoserver_button.click(function() {O.emit('config_banjoserver');});
-  O.div().append(config_banjoserver_button);
+  var config_server_button=$('<button>Configure server</button>');
+  config_server_button.click(function() {O.emit('config_server');});
+  O.div().append(config_server_button);
   
   var view_templates_button=$('<button>View templates</button>');
   view_templates_button.click(view_templates);
@@ -188,7 +178,7 @@ function ControlWidget(O,context) {
       alert('Unable to find prv with name: '+templates_name);
       return;
     }
-    var X=new BanjoViewGenerator(context.jscontext);
+    var X=new BanjoViewGenerator(context);
     X.createTemplatesView(templates,{},function(tmp) {
       if (!tmp.success) {
         alert('Unable to create templates view: '+tmp.error);

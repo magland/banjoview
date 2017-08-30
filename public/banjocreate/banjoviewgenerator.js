@@ -1,7 +1,7 @@
-function BanjoViewGenerator(jscontext) {
+function BanjoViewGenerator(context) {
   var that=this;
 
-  this.setServer=function(server) {m_server=server;};
+  var jscontext=context.jscontext;
 
   this.createTemplatesView=function(templates,opts,callback) {createTemplatesView(templates,opts,callback);};
   this.createCorrelogramsView=function(correlograms,opts,callback) {createCorrelogramsView(correlograms,opts,callback);};
@@ -10,10 +10,6 @@ function BanjoViewGenerator(jscontext) {
   this.addView=function(container,view) {view.container=container; m_views.push(view);};
   this.createPageUrl=function(callback) {createPageUrl(callback);};
 
-  var m_server={
-    host:'http://river.simonsfoundation.org',
-    port:'60001'
-  };
   var m_views=[];
 
   function createTemplatesView(templates,opts,callback) {
@@ -55,19 +51,19 @@ function BanjoViewGenerator(jscontext) {
 
   function get_url_for_prv(prv,callback) {
     console.log ('Getting url for prv...');
-    var server_url=m_server.host+':'+m_server.port;
-    var url0=server_url+'/prvbucketserver?a=locate&checksum='+prv.original_checksum+'&size='+prv.original_size+'&fcs='+(prv.original_fcs||'');
-    jscontext.http_get_text(url0,function(tmp) {
+    var server_url=context.config.kulele_url+'/subserver/'+context.config.server;
+    var url0=server_url+'?a=prv-locate&checksum='+prv.original_checksum+'&size='+prv.original_size+'&fcs='+(prv.original_fcs||'');
+    jscontext.http_get_json(url0,function(tmp) {
       if (!tmp.success) {
         callback(tmp);
         return;
       }
-      var txt=tmp.text;
-      if (!starts_with(txt,'http')) {
-        callback({success:false,error:'Error getting url for prv: '+txt});
-        return;
+      var obj=tmp.object;
+      if (!obj.found) {
+        callback({success:false,error:'Error getting url for prv. File not found'});
+        return;  
       }
-      callback({success:true,url:txt});
+      callback({success:true,url:server_url+'/'+obj.path+'?mode=download'});
     });
   }
 

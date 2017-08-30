@@ -54,14 +54,18 @@ function ProcessManager(O,context) {
 		  outputs:outputs_to_return,
 		  parameters:params
 		};
-		var banjoserver_url=context.banjoserver.url;
+		var kulele_url=context.config.kulele_url;
+		var server=context.config.server;
+		if (!server) {
+			callback({success:false,error:'Server has not been set.'});
+			return;
+		}
 		var str='';
 		str+='&processor_name='+processor_name;
 		str+='&inputs='+JSON.stringify(inputs);
 		str+='&outputs='+JSON.stringify(outputs_to_return);
 		str+='&parameters='+JSON.stringify(params);
-		if (context.banjoserver.passcode) str+='&passcode='+context.banjoserver.passcode;
-		var url0=banjoserver_url+'/banjoserver?a=queue-process'+str;
+		var url0=kulele_url+'/subserver/'+server+'?a=queue-process'+str;
 		context.log(category,url0);
 		jscontext.http_get_json(url0,function(tmp) {
 		  if (!tmp.success) {

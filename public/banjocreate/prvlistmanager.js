@@ -44,9 +44,13 @@ function PrvListManager(O,context) {
   function check_on_server(name,prv) {
     var jscontext=context.jscontext;
     var obj=prv.content;
-    var banjoserver_url=context.banjoserver.url;
-    var url=banjoserver_url+'/banjoserver?a=prv-locate&checksum='+obj.original_checksum+'&size='+obj.original_size+'&fcs='+obj.original_fcs;   
-    if (context.banjoserver.passcode) url+='&passcode='+context.banjoserver.passcode;
+    var kulele_url=context.config.kulele_url;
+    var server=context.config.server;
+    if (!server) {
+      console.log ('Server has not been set');
+      return;
+    }
+    var url=kulele_url+'/subserver/'+server+'?a=prv-locate&checksum='+obj.original_checksum+'&size='+obj.original_size+'&fcs='+obj.original_fcs;   
     jscontext.http_get_json(url,function(resp) {
       var val=undefined;
       if (resp.success) {
