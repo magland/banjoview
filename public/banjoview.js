@@ -4,12 +4,47 @@ function jsqmain(query) {
     if ((query.mode||'')=='create') {
         var LS=new LocalStorage();
         var X=new BanjoCreateMainWindow(0);
-        X.load(LS.readObject('BanjoCreateMainWindow'));
+        load_content(function() {
+            X.showFullBrowser();
+        });
         X.showFullBrowser();
 
-        JSQ.connect(X,'save',0,function() {
-            LS.writeObject('BanjoCreateMainWindow',X.save());
-        });
+        function load_content(callback) {
+            var jscontext=new JSContext();
+            if (query.BanjoCreateMainWindow_url) {
+                jscontext.http_get_json(query.BanjoCreateMainWindow_url,function(tmp) {
+                    if (!tmp.success) {
+                        console.log('Error loading: '+query.BanjoCreateMainWindow_url);
+                        return;
+                    }
+                    X.load(tmp.object);
+                    callback();
+                });
+            }
+            else {
+                X.load(LS.readObject('BanjoCreateMainWindow'));
+                JSQ.connect(X,'save',0,function() {
+                    LS.writeObject('BanjoCreateMainWindow',X.save());
+                });
+                callback();
+            }
+        }
+        function url4text(txt,callback) {
+            var jscontext=new JSContext();
+            console.log ('Getting url4text...');
+            jscontext.http_post_json('https://url4text.herokuapp.com/api/text/',{text:txt},cb);
+            function cb(tmp) {
+              console.log(tmp);
+              if (!tmp.success) {
+                callback(tmp);
+                return;
+              }
+              response=tmp.response;
+              var url0=response.raw||0;
+              callback({success:true,url:url0});
+            }
+        }
+
         return;
     }
 
