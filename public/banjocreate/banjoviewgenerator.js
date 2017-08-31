@@ -53,6 +53,7 @@ function BanjoViewGenerator(context) {
     console.log ('Getting url for prv...');
     var server_url=context.config.kulele_url+'/subserver/'+context.config.server;
     var url0=server_url+'?a=prv-locate&checksum='+prv.original_checksum+'&size='+prv.original_size+'&fcs='+(prv.original_fcs||'');
+    console.log(url0);
     jscontext.http_get_json(url0,function(tmp) {
       if (!tmp.success) {
         callback(tmp);
@@ -63,7 +64,7 @@ function BanjoViewGenerator(context) {
         callback({success:false,error:'Error getting url for prv. File not found'});
         return;  
       }
-      callback({success:true,url:server_url+'/'+obj.path+'?mode=download'});
+      callback({success:true,url:server_url+'/raw/'+obj.path});
     });
   }
 
